@@ -1,0 +1,14 @@
+{
+  "name": "nas-telegram-bot",
+  "version": "1.0.0",
+  "description": "Bot Telegram de monitoring et controle pour NAS (temperatures disques, ping, arret d'urgence conteneurs)",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "dotenv": "^16.4.5"
+  }
+}
