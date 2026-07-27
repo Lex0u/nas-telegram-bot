@@ -31,7 +31,7 @@
     "monitoring"
   ],
   "dependencies": {
-    "@lex0u/logger": "^2.0.3",
+    "@lex0u/logger": "^2.2.1",
     "chart.js": "^4.4.7",
     "chartjs-node-canvas": "^5.0.0",
     "@clack/prompts": "^0.9.1",
