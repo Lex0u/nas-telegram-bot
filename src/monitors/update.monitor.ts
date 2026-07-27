@@ -12,7 +12,13 @@ import { sendToAllowedChat } from "../core/bot.js";
 import { logger } from "../utils/logger.js";
 
 const execFileAsync = promisify(execFile);
-const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+
+let dockerClient: Docker | undefined;
+
+function getDocker(): Docker {
+  dockerClient ??= new Docker({ socketPath: "/var/run/docker.sock" });
+  return dockerClient;
+}
 
 async function countAptUpgrades(): Promise<number | null> {
   try {
@@ -29,7 +35,7 @@ async function countAptUpgrades(): Promise<number | null> {
 }
 
 async function pullImage(imageRef: string): Promise<void> {
-  const stream = await docker.pull(imageRef);
+  const stream = await getDocker().pull(imageRef);
   await new Promise<void>((resolvePull, rejectPull) => {
     stream.on("end", () => {
       resolvePull();
@@ -42,14 +48,14 @@ async function pullImage(imageRef: string): Promise<void> {
 }
 
 async function hasImageUpdate(containerName: string): Promise<boolean> {
-  const container = docker.getContainer(containerName);
+  const container = getDocker().getContainer(containerName);
   const info = await container.inspect();
   const imageRef = info.Config.Image;
   const currentImageId = info.Image;
 
   await pullImage(imageRef);
 
-  const freshImage = await docker.getImage(imageRef).inspect();
+  const freshImage = await getDocker().getImage(imageRef).inspect();
   return freshImage.Id !== currentImageId;
 }
 

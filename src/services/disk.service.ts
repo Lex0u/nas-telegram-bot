@@ -45,7 +45,7 @@ interface SmartCtlAttributeTable {
   raw: { value: number };
 }
 
-interface SmartCtlJson {
+export interface SmartCtlJson {
   ata_smart_attributes?: {
     table: SmartCtlAttributeTable[];
   };
@@ -75,7 +75,7 @@ async function readSmartCtlJson(device: string): Promise<SmartCtlJson | null> {
   }
 }
 
-function extractTemperature(data: SmartCtlJson): number | null {
+export function extractTemperature(data: SmartCtlJson): number | null {
   if (typeof data.temperature?.current === "number") {
     return data.temperature.current;
   }
@@ -87,7 +87,7 @@ function extractTemperature(data: SmartCtlJson): number | null {
   return attribute?.raw.value ?? null;
 }
 
-function statusFor(
+export function statusFor(
   temperature: number | null,
   thresholds: Thresholds,
 ): DiskStatus {
