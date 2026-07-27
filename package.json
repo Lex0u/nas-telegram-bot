@@ -36,7 +36,7 @@
     "chartjs-node-canvas": "^5.0.0",
     "@clack/prompts": "^0.9.1",
     "dockerode": "^4.0.3",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.4.2",
     "node-cron": "^3.0.3",
     "telegraf": "^4.16.3",
     "tslib": "^2.8.1",
