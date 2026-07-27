@@ -55,14 +55,28 @@ Relance `npm run setup` à tout moment pour ajuster la configuration.
 ## Docker
 
 ```bash
-docker build -t nas-telegram-bot .
+docker compose up -d --build
+```
+
+Le `docker-compose.yml` fourni monte `config.json` et `data/` en volumes, expose les
+devices disque (`/dev/sda`, `/dev/sdb` — à adapter à ta config) et le socket Docker,
+avec `SYS_RAWIO` nécessaire à la lecture SMART dans le conteneur. `.env` est chargé
+automatiquement via `env_file`.
+
+Pour un `docker run` équivalent sans Compose :
+
+```bash
+docker build -t bot .
 docker run -d \
+  --name telegram-bot \
+  --restart unless-stopped \
   --env-file .env \
   -v $(pwd)/config.json:/app/config.json:ro \
   -v $(pwd)/data:/app/data \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --device /dev/sda --device /dev/sdb \
-  nas-telegram-bot
+  --cap-add=SYS_RAWIO \
+  bot
 ```
 
 Une image multi-arch (`linux/amd64`, `linux/arm64`) est publiée sur GHCR à chaque release.
