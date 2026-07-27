@@ -1,55 +1,34 @@
 // src/services/docker.service.ts
 import { LogLevel } from "@lex0u/logger";
 import Docker from "dockerode";
-import type { ContainerInspectInfo } from "dockerode";
 
 import { logger } from "../utils/logger.js";
+import { extractHealth, formatStatusText } from "./docker-format.js";
+import type { ContainerHealth } from "./docker-format.js";
 
-const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+// Ré-exportées pour compatibilité : le reste du code (et les tests) peut
+// continuer à importer ces symboles depuis docker.service.ts sans savoir
+// qu'ils vivent réellement dans docker-format.ts (module sans dépendance
+// runtime sur dockerode, pour rester importable même si dockerode/ssh2
+// pose souci au chargement sur certains environnements).
+export type { ContainerHealth } from "./docker-format.js";
+export { extractHealth, formatRelativeDuration } from "./docker-format.js";
 
-export type ContainerHealth = "healthy" | "unhealthy" | "starting" | "none";
+// Instanciation paresseuse : si ce module est importé sans qu'un conteneur
+// ne soit jamais réellement appelé, aucun client Docker n'est construit —
+// évite tout effet de bord au chargement.
+let dockerClient: Docker | undefined;
+
+function getDocker(): Docker {
+  dockerClient ??= new Docker({ socketPath: "/var/run/docker.sock" });
+  return dockerClient;
+}
 
 export interface ContainerStatus {
   name: string;
   state: string; // "running", "exited", "restarting"...
   status: string; // texte lisible, ex: "Up 3 hours"
   health: ContainerHealth;
-}
-
-function extractHealth(
-  inspectState: ContainerInspectInfo["State"],
-): ContainerHealth {
-  const status = inspectState.Health?.Status;
-  if (status === "healthy" || status === "unhealthy" || status === "starting") {
-    return status;
-  }
-  return "none";
-}
-
-function formatRelativeDuration(isoTimestamp: string): string {
-  const elapsedMs = Date.now() - new Date(isoTimestamp).getTime();
-  const elapsedSeconds = Math.floor(elapsedMs / 1000);
-
-  if (elapsedSeconds < 60) return "moins d'une minute";
-
-  const elapsedMinutes = Math.floor(elapsedSeconds / 60);
-  if (elapsedMinutes < 60) return `${elapsedMinutes} min`;
-
-  const elapsedHours = Math.floor(elapsedMinutes / 60);
-  if (elapsedHours < 24) return `${elapsedHours} h`;
-
-  const elapsedDays = Math.floor(elapsedHours / 24);
-  return `${elapsedDays} j`;
-}
-
-function formatStatusText(state: ContainerInspectInfo["State"]): string {
-  const health = extractHealth(state);
-  const healthSuffix = health === "none" ? "" : ` (${health})`;
-
-  if (state.Running) {
-    return `Up depuis ${formatRelativeDuration(state.StartedAt)}${healthSuffix}`;
-  }
-  return `Arrêté depuis ${formatRelativeDuration(state.FinishedAt)}`;
 }
 
 export async function listContainerStatuses(
@@ -59,7 +38,7 @@ export async function listContainerStatuses(
 
   for (const name of containerNames) {
     try {
-      const container = docker.getContainer(name);
+      const container = getDocker().getContainer(name);
       const info = await container.inspect();
 
       results.push({
@@ -88,7 +67,7 @@ export async function listContainerStatuses(
 }
 
 export async function restartContainer(name: string): Promise<void> {
-  const container = docker.getContainer(name);
+  const container = getDocker().getContainer(name);
   await container.restart();
   await logger.log.file(
     LogLevel.Information,
@@ -98,7 +77,7 @@ export async function restartContainer(name: string): Promise<void> {
 }
 
 export async function stopContainers(names: string[]): Promise<void> {
-  await Promise.all(names.map((name) => docker.getContainer(name).stop()));
+  await Promise.all(names.map((name) => getDocker().getContainer(name).stop()));
   await logger.log.file(
     LogLevel.Warning,
     `Conteneurs arrêtés : ${names.join(", ")}`,
@@ -110,7 +89,7 @@ export async function getContainerLogs(
   name: string,
   tailLines = 50,
 ): Promise<string> {
-  const container = docker.getContainer(name);
+  const container = getDocker().getContainer(name);
   const buffer = await container.logs({
     stdout: true,
     stderr: true,

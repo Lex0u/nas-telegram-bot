@@ -6,3 +6,4 @@ data/*.db-journal
 config.json
 *.log
 .DS_Store
+*.tsbuildinfo

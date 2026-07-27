@@ -1,6 +1,6 @@
 {
   "name": "nas-telegram-bot",
-  "version": "1.0.5",
+  "version": "1.0.0",
   "description": "Bot Telegram de monitoring et contrôle pour NAS (températures disques, Docker, historique, alertes proactives)",
   "main": "dist/index.js",
   "type": "module",
@@ -8,7 +8,7 @@
     "node": ">=22.5.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "setup": "tsx src/cli/setup.ts",
@@ -31,10 +31,10 @@
     "monitoring"
   ],
   "dependencies": {
-    "@clack/prompts": "^0.9.1",
     "@lex0u/logger": "^2.0.3",
     "chart.js": "^4.4.7",
     "chartjs-node-canvas": "^5.0.0",
+    "@clack/prompts": "^0.9.1",
     "dockerode": "^4.0.3",
     "dotenv": "^16.4.5",
     "node-cron": "^3.0.3",
@@ -45,7 +45,7 @@
   "devDependencies": {
     "@eslint/js": "^9.18.0",
     "@types/dockerode": "^3.3.32",
-    "@types/node": "^22.20.1",
+    "@types/node": "^22.10.7",
     "@types/node-cron": "^3.0.11",
     "eslint": "^9.18.0",
     "prettier": "^3.4.2",
