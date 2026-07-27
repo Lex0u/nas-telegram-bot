@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Question générale
+    url: https://github.com/Lex0u/logger/discussions
+    about: Pose une question à la communauté avant d'ouvrir une issue

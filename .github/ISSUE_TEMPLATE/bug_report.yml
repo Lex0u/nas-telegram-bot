@@ -1,0 +1,47 @@
+name: 🐛 Bug report
+description: Signaler un comportement inattendu
+labels: ["type: bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que s'est-il passé ? À quoi tu t'attendais ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Étapes de reproduction
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs pertinents
+      description: Contenu de `data/logs`, sortie console, etc. (retire les secrets)
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Version du bot / commit
+    validations:
+      required: false
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environnement d'exécution
+      options:
+        - Raspberry Pi (natif)
+        - Docker
+        - Autre Linux
+        - Windows (dev)
+    validations:
+      required: true
