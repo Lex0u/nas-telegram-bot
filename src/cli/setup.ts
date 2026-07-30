@@ -15,6 +15,7 @@ import { resolve } from "node:path";
 import { CONFIG_PATH } from "../config/index.js";
 import { configSchema } from "../config/schema.js";
 import type { Disk, Thresholds } from "../config/schema.js";
+import { formatBytes, readDiskSpaceUsage } from "../services/disk.service.js";
 
 const ENV_PATH = resolve(process.cwd(), ".env");
 
@@ -107,6 +108,19 @@ async function collectDisks(): Promise<Disk[]> {
             value.startsWith("/") ? undefined : "Doit commencer par /",
         }),
       );
+
+      const usage = readDiskSpaceUsage({ name, device, mountPath });
+      if (usage) {
+        const usedBytes = usage.totalBytes - usage.freeBytes;
+        log.info(
+          `Espace utilisé sur ${mountPath} : ${formatBytes(usedBytes)} / ` +
+            `${formatBytes(usage.totalBytes)} (${usage.usedPercent.toFixed(1)}%)`,
+        );
+      } else {
+        log.warn(
+          `Impossible de lire l'espace disque sur ${mountPath} — vérifie le point de montage.`,
+        );
+      }
     }
 
     disks.push(mountPath ? { name, device, mountPath } : { name, device });

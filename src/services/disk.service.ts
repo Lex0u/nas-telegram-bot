@@ -1,5 +1,6 @@
 // src/services/disk.service.ts
 import { execFile } from "node:child_process";
+import { statfsSync } from "node:fs";
 import { promisify } from "node:util";
 
 import { LogLevel } from "@lex0u/logger";
@@ -119,4 +120,50 @@ export async function readAllDiskTemperatures(
   return Promise.all(
     disks.map((disk) => readDiskTemperature(disk, thresholds)),
   );
+}
+
+export interface DiskSpaceUsage {
+  name: string;
+  mountPath: string;
+  usedPercent: number;
+  totalBytes: number;
+  freeBytes: number;
+}
+
+export function readDiskSpaceUsage(disk: Disk): DiskSpaceUsage | null {
+  if (!disk.mountPath) return null;
+
+  try {
+    const stats = statfsSync(disk.mountPath);
+    const blockSize = Number(stats.bsize);
+    const totalBlocks = Number(stats.blocks);
+    const freeBlocks = Number(stats.bfree);
+    if (totalBlocks === 0) return null;
+
+    const totalBytes = totalBlocks * blockSize;
+    const freeBytes = freeBlocks * blockSize;
+
+    return {
+      name: disk.name,
+      mountPath: disk.mountPath,
+      usedPercent: ((totalBlocks - freeBlocks) / totalBlocks) * 100,
+      totalBytes,
+      freeBytes,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function readAllDiskSpaceUsage(disks: Disk[]): DiskSpaceUsage[] {
+  return disks
+    .map((disk) => readDiskSpaceUsage(disk))
+    .filter((usage): usage is DiskSpaceUsage => usage !== null);
+}
+
+export function formatBytes(bytes: number): string {
+  const gigabytes = bytes / 1_000_000_000;
+  return gigabytes >= 1000
+    ? `${(gigabytes / 1000).toFixed(1)} To`
+    : `${gigabytes.toFixed(1)} Go`;
 }
