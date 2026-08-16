@@ -94,7 +94,7 @@ Relance `npm run setup` à tout moment pour ajuster la configuration.
 ## ✨ Fonctionnalités
 
 - 📊 **Statut système** — CPU, RAM, température, load average
-- 🌡️ **Températures disques** — lecture SMART (`smartctl`), alertes sur seuils
+- 🌡️ **Températures disques** — lecture SMART (`smartctl`), alertes sur seuils, arrêt des conteneurs en cas d'alerte critique (redémarrage auto alerte en cas de non retour à la normale en 30min)
 - 🐳 **Gestion Docker** — statut/santé par conteneur, restart, logs, arrêt groupé d'urgence
 - 📈 **Historique** — CPU/RAM/températures sur la durée, graphiques à la demande
 - 🔔 **Alertes proactives** — espace disque faible, conteneur down/unhealthy, MAJ système et images Docker disponibles
