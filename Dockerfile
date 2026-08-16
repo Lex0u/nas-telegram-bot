@@ -1,12 +1,5 @@
 # syntax=docker/dockerfile:1
 
-# `canvas` (utilisé par chartjs-node-canvas) est un module natif : il a besoin
-# d'un toolchain de compilation + des headers -dev au moment du `npm ci`, mais
-# uniquement des libs partagées (.so) à l'exécution. D'où les 4 stages :
-# deps/build ont le toolchain complet, prod-deps réinstalle en mode production
-# avec le même toolchain, et runtime ne récupère que node_modules + dist déjà
-# construits — pas de compilateur dans l'image finale.
-
 ARG NODE_VERSION=22-bookworm-slim
 
 FROM node:${NODE_VERSION} AS deps
@@ -19,7 +12,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 FROM deps AS build
-COPY tsconfig.json ./
+COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN npm run build
 
@@ -35,7 +28,7 @@ RUN npm ci --omit=dev
 FROM node:${NODE_VERSION} AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2 libpango-1.0-0 libjpeg62-turbo libgif7 librsvg2-2 \
-    smartmontools iputils-ping ca-certificates \
+    smartmontools hdparm iputils-ping ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Thresholds } from "../config/schema.js";
-import { extractTemperature, statusFor } from "./disk.service.js";
+import { extractTemperature, formatBytes, statusFor } from "./disk.service.js";
 import type { SmartCtlJson } from "./disk.service.js";
 
 const THRESHOLDS: Thresholds = {
@@ -88,5 +88,30 @@ describe("extractTemperature", () => {
     };
 
     expect(extractTemperature(data)).toBeNull();
+  });
+});
+
+describe("formatBytes", () => {
+  it("affiche en Go sous 1000 Go", () => {
+    // Arrange
+    const bytes = 450_200_000_000; // 450.2 Go
+
+    // Act
+    const result = formatBytes(bytes);
+
+    // Assert
+    expect(result).toBe("450.2 Go");
+  });
+
+  it("bascule en To à partir de 1000 Go", () => {
+    expect(formatBytes(1_000_000_000_000)).toBe("1.0 To");
+  });
+
+  it("affiche correctement plusieurs To", () => {
+    expect(formatBytes(2_500_000_000_000)).toBe("2.5 To");
+  });
+
+  it("gère une valeur nulle", () => {
+    expect(formatBytes(0)).toBe("0.0 Go");
   });
 });
