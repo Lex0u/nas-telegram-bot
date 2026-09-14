@@ -34,7 +34,7 @@
     "@lex0u/logger": "^2.3.0",
     "chart.js": "^4.4.7",
     "chartjs-node-canvas": "^5.0.0",
-    "@clack/prompts": "^0.9.1",
+    "@clack/prompts": "^1.8.0",
     "dockerode": "^4.0.3",
     "dotenv": "^16.4.5",
     "node-cron": "^4.6.0",
